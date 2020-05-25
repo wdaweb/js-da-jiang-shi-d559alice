@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #game {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            width: 1100px;
+            height: 720px;
+            border: 1px solid black;
+        }
+
+        .dinosaur {
+            position: absolute;
+            height: 100px;
+        }
+
+        #carspace {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+            width: 1100px;
+            height: 720px;
+            overflow: hidden;
+        }
+
+        #imgs {
+            position: absolute;
+            right: 0%;
+            height: 720px;
+
+        }
+
+        .bgimg {
+            width: 1100px;
+            height: 720px;
+            float: right;
+        }
+
+        #car {
+            position: absolute;
+            top: calc(50% + 100px);
+            /* left: 60%; */
+            right: 50px;
+            height: 100px;
+            /* background: black; */
+        }
+
+        .level {
+            position: absolute;
+            top: calc(50% - 50px);
+            width: 1100px;
+            height: 100px;
+            background: rgba(255, 200, 200, 0.5);
+            font-size: 50px;
+            color: brown;
+            line-height: 100px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="carspace">
+        <div id="imgs">
+            <img src="./images/bg123.jpg" class="bgimg">
+            <img src="./images/bg123.jpg" class="bgimg">
+            <!-- <img src="./images/bg123.jpg" class="bgimg"> -->
+        </div>
+        <img src="./images/car.gif" id="car">
+        <div class="level"></div>
+    </div>
+    <div id="game">
+    </div>
+    <input type="button" value="開始遊戲" id="btn-start">
+    <p>秒數：<span id="text-time">0</span>秒</p>
+    <script src="jquery-3.5.0.min.js"></script>
+    <script>
+
+        // 時間
+        let timeplus = 0;
+        // 遊戲計時器
+        let gametimer = 0;
+        // 遊戲開始結束
+        let ingame = true;
+
+        // 恐龍流水號
+        let dinoid = 0;
+        // 恐龍高度位置
+        let dinoarray = ['calc(50% - 20px)', 'calc(50% + 40px)', 'calc(50% + 100px)', 'calc(50% + 160px)', 'calc(50% + 220px)']
+        // 恐龍高度位置隨機
+        let dinonum = 0;
+
+        let speed = 0;
+
+        // 隨機值 function
+        const rand = (num) => {
+            return Math.round(Math.random() * num)
+        }
+
+        // 背景動態
+        const bganimate = () => {
+            setInterval(() => {
+                const total = $(".bgimg").length;
+                $("#imgs").css("width", total * 1100);
+                $("#imgs").animate({
+                    right: `-=2px`
+                }, 1)
+                for (i = 1; i < 999; i++) {
+                    if (($("#imgs").css("right").slice(0, -2) * 1) == (-1100 * i)) {
+                        $("#imgs").append(`<img src="./images/bg123.jpg" class="bgimg">`)
+                    }
+                }
+            }, 1)
+        }
+        bganimate()
+
+        // $(".level").hide()
+
+        // 遞迴function，可以一直重複執行
+        const movedinosaur = (dinoid) => {
+            // 恐龍位移動畫
+            $(`#dinosaur${dinoid}`).animate({
+                top: dinoarray[dinonum],
+                left: `+=${speed}px`
+            }, 1, function () {
+                movedinosaur(dinoid);
+
+                // 恐龍座標
+                dinosaurleft = $(`#dinosaur${dinoid}`).css("left").slice(0, -2) * 1 + 130
+                dinosaurtop = $(`#dinosaur${dinoid}`).css("top").slice(0, -2) * 1 + 60
+                console.log(dinosaurtop)
+                // 車子座標
+                carright = $("#car").css("left").slice(0, -2) * 1
+                cartop = $("#car").css("top").slice(0, -2) * 1 + 60
+                console.log(cartop)
+
+                // 恐龍的位置超出遊戲畫面，則移除
+                if (($(`#dinosaur${dinoid}`).css("left").slice(0, -2) * 1) >= 850) {
+                    $(`#dinosaur${dinoid}`).remove()
+                }
+                // 車子碰到恐龍
+                if (dinosaurleft >= carright && dinosaurtop == cartop) {
+                    // 車子爆掉
+                    $("#car").attr("src", "./images/carbroken.png")
+                    // 遊戲內圖案移除
+                    $(".dinosaur").remove();
+                    // 遊戲結束
+                    ingame = false
+                }
+            })
+
+        }
+
+        // 遊戲開始按鈕
+        $("#btn-start").click(function () {
+            // 遊戲開始
+            ingame = true;
+            // 停用開始按鈕
+            $(this).attr("disabled", true);
+            // 車子圖案恢復
+            $("#car").attr("src", "./images/car.gif")
+            // 重設時間
+            timeplus = 0;
+            $("#text-time").text(timeplus);
+
+            // 遊戲計時
+            gametimer = setInterval(() => {
+                // 時間累加
+                timeplus++;
+                $("#text-time").text(timeplus);
+
+                // 遊戲結束
+                if (ingame == false) {
+                    // 停止計時器
+                    clearInterval(gametimer);
+                    // 啟用開始按鈕
+                    $(this).attr("disabled", false);
+                    // 跳出Game Over訊息
+                    setTimeout(() => {
+                        alert("Game Over");
+                    }, 10);
+                }
+                else {
+                    // 隨機
+                    const num = rand(10);
+                    // 恐龍高度陣列隨機索引值
+                    dinonum = rand(4);
+
+                    // 如果抽到數字大於1，產生一隻恐龍
+                    if (timeplus >= 2 && timeplus < 22) {
+                        if (num > 5) {
+                            $("#game").append(`<img src="./images/dino1.gif" id="dinosaur${dinoid}" class="dinosaur">`);
+                            $(`#dinosaur${dinoid}`).css({
+                                top: dinoarray[dinonum],
+                                left: "0px",
+                            })
+                            speed = 10
+                            movedinosaur(dinoid);
+                            dinoid++;
+                        }
+                    }
+                    else if (timeplus >= 22 && timeplus < 42) {
+                        $("#game").append(`<img src="./images/dino1.gif" id="dinosaur${dinoid}" class="dinosaur">`);
+                        $(`#dinosaur${dinoid}`).css({
+                            top: dinoarray[dinonum],
+                            left: "0px",
+                        })
+                        speed = 20
+                        movedinosaur(dinoid);
+                        dinoid++;
+                    }
+                    else if (timeplus >= 42) {
+                        $("#game").append(`<img src="./images/dino1.gif" id="dinosaur${dinoid}" class="dinosaur">`);
+                        $(`#dinosaur${dinoid}`).css({
+                            top: dinoarray[dinonum],
+                            left: "50px",
+                        })
+                        speed = 25
+                        movedinosaur(dinoid);
+                        dinoid++;
+                    }
+
+
+                    if (timeplus == 1) {
+                        // $("#carspace").append(`<div class="level">LEVEL 1</div>`);
+                        $(".level").text("LEVEL1")
+                        $(".level").show(1000).fadeOut(2000)
+                    }
+                    else if (timeplus == 20) {
+                        $(".level").text("LEVEL2")
+                        $(".level").show(1000).fadeOut(2000)
+                    }
+                    else if (timeplus == 40) {
+                        $(".level").text("LEVEL3")
+                        $(".level").show(1000).fadeOut(2000)
+                    }
+                }
+
+
+            }, 1000)
+        })
+
+
+        //賽車鍵盤移動位置
+        let numcar = 0;
+        // let Item = $('#car');
+
+        $(document).keydown(function (event) {
+            var keyNum = event.which; //獲取鍵值
+            var Item = $('#car'); //要移動的元素
+            if (numcar < 2 && numcar > -2) {
+                switch (keyNum) { //判斷按鍵
+                    case 38: Item.css({ top: '-=60px' });
+                        numcar -= 1;
+                        break;
+                    case 40: Item.css({ top: '+=60px' });
+                        numcar += 1;
+                }
+            }
+            else if (numcar == 2) {
+                switch (keyNum) { //判斷按鍵
+                    case 38: Item.css({ top: '-=60px' });
+                        numcar -= 1;
+                        break;
+                }
+            }
+            else if (numcar == -2) {
+                switch (keyNum) { //判斷按鍵
+                    case 40: Item.css({ top: '+=60px' });
+                        numcar += 1;
+                        break;
+                }
+            }
+        });
+
+    </script>
+
+</body>
+
+</html>
