@@ -33,28 +33,26 @@
             width: 1100px;
             height: 720px;
             overflow: hidden;
+            background-image: url("/cargame/images/bg123.jpg");
+            background-position: bottom;
+            background-repeat: repeat-x;
+            animation: bg 8s linear infinite;
         }
 
-        #imgs {
-            position: absolute;
-            right: 0%;
-            height: 720px;
-
-        }
-
-        .bgimg {
-            width: 1100px;
-            height: 720px;
-            float: right;
-        }
+        @keyframes bg {
+                from {
+                    background-position: 0 bottom;
+                }
+                to {
+                    background-position: 1024px bottom;
+                }
+            }
 
         #car {
             position: absolute;
             top: calc(50% + 100px);
-            /* left: 60%; */
             right: 50px;
             height: 100px;
-            /* background: black; */
         }
 
         .level {
@@ -74,11 +72,6 @@
 
 <body>
     <div id="carspace">
-        <div id="imgs">
-            <img src="./images/bg123.jpg" class="bgimg">
-            <img src="./images/bg123.jpg" class="bgimg">
-            <!-- <img src="./images/bg123.jpg" class="bgimg"> -->
-        </div>
         <img src="./images/car.gif" id="car">
         <div class="level"></div>
     </div>
@@ -110,25 +103,6 @@
             return Math.round(Math.random() * num)
         }
 
-        // 背景動態
-        const bganimate = () => {
-            setInterval(() => {
-                const total = $(".bgimg").length;
-                $("#imgs").css("width", total * 1100);
-                $("#imgs").animate({
-                    right: `-=2px`
-                }, 1)
-                for (i = 1; i < 999; i++) {
-                    if (($("#imgs").css("right").slice(0, -2) * 1) == (-1100 * i)) {
-                        $("#imgs").append(`<img src="./images/bg123.jpg" class="bgimg">`)
-                    }
-                }
-            }, 1)
-        }
-        bganimate()
-
-        // $(".level").hide()
-
         // 遞迴function，可以一直重複執行
         const movedinosaur = (dinoid) => {
             // 恐龍位移動畫
@@ -157,6 +131,10 @@
                     $("#car").attr("src", "./images/carbroken.png")
                     // 遊戲內圖案移除
                     $(".dinosaur").remove();
+                    // 背景暫停
+                    $("#carspace").css({
+                        animation:"paused",
+                    });
                     // 遊戲結束
                     ingame = false
                 }
@@ -172,6 +150,10 @@
             $(this).attr("disabled", true);
             // 車子圖案恢復
             $("#car").attr("src", "./images/car.gif")
+            // 背景循環動畫
+            $("#carspace").css({
+                        animation:"bg 8s linear infinite",
+                    });
             // 重設時間
             timeplus = 0;
             $("#text-time").text(timeplus);
@@ -233,7 +215,6 @@
                         dinoid++;
                     }
 
-
                     if (timeplus == 1) {
                         // $("#carspace").append(`<div class="level">LEVEL 1</div>`);
                         $(".level").text("LEVEL1")
@@ -248,7 +229,6 @@
                         $(".level").show(1000).fadeOut(2000)
                     }
                 }
-
 
             }, 1000)
         })
